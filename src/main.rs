@@ -20,7 +20,7 @@ fn main2() -> Result<(), Error> {
 
   let n = f.read(&mut buffer[..8])?;
   if n != 8 || &buffer[..8] != b"mozLz40\0" {
-    return Err(format_err!("bad header: {:?}", &buffer[..8]));
+    return Err(format_err!("bad header: {:?}", &buffer[..n]));
   }
 
   let dst_size = f.read_u32::<LittleEndian>()?;
