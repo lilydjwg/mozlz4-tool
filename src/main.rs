@@ -40,5 +40,6 @@ fn main2() -> Result<(), Error> {
 fn main() {
   if let Err(e) = main2() {
     eprintln!("Error: {:?}", e);
+    ::std::process::exit(1);
   }
 }
