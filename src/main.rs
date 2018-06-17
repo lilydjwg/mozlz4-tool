@@ -1,45 +1,34 @@
 #[macro_use(format_err)] extern crate failure;
 extern crate libc;
 extern crate byteorder;
-
-use std::env::args;
-use std::fs::File;
-use std::io::{self, BufReader, Read, Write};
-
-use byteorder::{LittleEndian, ReadBytesExt};
+extern crate clap;
 
 mod ffi;
+mod cat;
+mod compress;
 
 use failure::Error;
+use clap::{App, Arg, ArgGroup};
 
-fn main2() -> Result<(), Error> {
-  let file = args().nth(1).expect("mozlz4 filename");
-  let f = File::open(file)?;
-  let mut f = BufReader::new(f);
-  let mut buffer = [0; 4096];
+fn main() -> Result<(), Error> {
+  let matches = App::new("mozlz4 tools")
+    .arg(Arg::with_name("compress")
+         .short("c")
+         .help("compress a file"))
+    .arg(Arg::with_name("decompress")
+         .short("d")
+         .help("decompress a file (default)"))
+    .arg(Arg::with_name("file")
+         .required(true))
+    .group(ArgGroup::with_name("action")
+           .args(&["compress", "decompress"]))
+    .get_matches();
 
-  let n = f.read(&mut buffer[..8])?;
-  if n != 8 || &buffer[..8] != b"mozLz40\0" {
-    return Err(format_err!("bad header: {:?}", &buffer[..n]));
+  if matches.is_present("compress") {
+    compress::compress(matches.value_of_os("file").unwrap())?;
+  } else {
+    cat::cat(matches.value_of_os("file").unwrap())?;
   }
-
-  let dst_size = f.read_u32::<LittleEndian>()?;
-
-  let mut input = vec![];
-  f.read_to_end(&mut input)?;
-
-  let output = ffi::decompress(&input, dst_size)?;
-
-  let stdout = io::stdout();
-  let mut stdout = stdout.lock();
-  stdout.write(&output)?;
 
   Ok(())
-}
-
-fn main() {
-  if let Err(e) = main2() {
-    eprintln!("Error: {:?}", e);
-    ::std::process::exit(1);
-  }
 }
