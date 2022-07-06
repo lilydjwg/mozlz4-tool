@@ -1,11 +1,12 @@
 [package]
 name = "mozlz4-tool"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["lilydjwg <lilydjwg@gmail.com>"]
+edition = "2021"
 
 [dependencies]
 libc = "*"
-failure = "*"
+eyre = "*"
 byteorder = "*"
 clap = "*"
 

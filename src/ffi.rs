@@ -1,6 +1,6 @@
 use libc::c_int;
 
-use failure::Error;
+use eyre::{Result, eyre};
 
 #[link(name="lz4")]
 extern "C" {
@@ -17,7 +17,7 @@ extern "C" {
   fn LZ4_compressBound(inputSize: c_int) -> c_int;
 }
 
-pub fn decompress(src: &[u8], dst_size: u32) -> Result<Vec<u8>, Error> {
+pub fn decompress(src: &[u8], dst_size: u32) -> Result<Vec<u8>> {
   let mut buffer = Vec::with_capacity(dst_size as usize);
   let n = unsafe {
     buffer.set_len(dst_size as usize);
@@ -27,7 +27,7 @@ pub fn decompress(src: &[u8], dst_size: u32) -> Result<Vec<u8>, Error> {
     )
   };
   if n < 0 {
-    Err(format_err!("LZ4 returned error code {}", n))
+    Err(eyre!("LZ4 returned error code {}", n))
   } else {
     Ok(buffer)
   }

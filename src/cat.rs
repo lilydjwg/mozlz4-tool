@@ -3,18 +3,18 @@ use std::io::{self, BufReader, Read, Write};
 use std::path::Path;
 
 use byteorder::{LittleEndian, ReadBytesExt};
-use failure::Error;
+use eyre::{Result, eyre};
 
-use ffi;
+use crate::ffi;
 
-pub fn cat<P: AsRef<Path>>(file: P) -> Result<(), Error> {
+pub fn cat<P: AsRef<Path>>(file: P) -> Result<()> {
   let f = File::open(file)?;
   let mut f = BufReader::new(f);
   let mut buffer = [0; 4096];
 
   let n = f.read(&mut buffer[..8])?;
   if n != 8 || &buffer[..8] != b"mozLz40\0" {
-    return Err(format_err!("bad header: {:?}", &buffer[..n]));
+    return Err(eyre!("bad header: {:?}", &buffer[..n]));
   }
 
   let dst_size = f.read_u32::<LittleEndian>()?;
@@ -26,7 +26,7 @@ pub fn cat<P: AsRef<Path>>(file: P) -> Result<(), Error> {
 
   let stdout = io::stdout();
   let mut stdout = stdout.lock();
-  stdout.write(&output)?;
+  stdout.write_all(&output)?;
 
   Ok(())
 }
