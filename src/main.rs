@@ -2,27 +2,30 @@ mod ffi;
 mod cat;
 mod compress;
 
+use std::ffi::OsString;
 use eyre::Result;
-use clap::{App, Arg, ArgGroup};
+use clap::{Command, Arg, ArgGroup, ArgAction};
 
 fn main() -> Result<()> {
-  let matches = App::new("mozlz4 tools")
-    .arg(Arg::with_name("compress")
+  let matches = Command::new("mozlz4 tools")
+    .arg(Arg::new("compress")
          .short('c')
+         .action(ArgAction::SetTrue)
          .help("compress a file"))
-    .arg(Arg::with_name("decompress")
+    .arg(Arg::new("decompress")
          .short('d')
+         .action(ArgAction::SetTrue)
          .help("decompress a file (default)"))
-    .arg(Arg::with_name("file")
+    .arg(Arg::new("file")
          .required(true))
-    .group(ArgGroup::with_name("action")
+    .group(ArgGroup::new("action")
            .args(&["compress", "decompress"]))
     .get_matches();
 
-  if matches.is_present("compress") {
-    compress::compress(matches.value_of_os("file").unwrap())?;
+  if matches.get_flag("compress") {
+    compress::compress(matches.get_one::<OsString>("file").unwrap())?;
   } else {
-    cat::cat(matches.value_of_os("file").unwrap())?;
+    cat::cat(matches.get_one::<OsString>("file").unwrap())?;
   }
 
   Ok(())
