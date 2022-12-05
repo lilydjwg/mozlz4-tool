@@ -39,7 +39,7 @@ pub fn compress(src: &[u8]) -> Vec<u8> {
   unsafe {
     let n = LZ4_compress_default(
       src.as_ptr(), buffer.as_mut_ptr(),
-      src.len() as i32, dst_size as i32,
+      src.len() as i32, dst_size,
     );
     buffer.set_len(n as usize);
   }

@@ -17,9 +17,10 @@ fn main() -> Result<()> {
          .action(ArgAction::SetTrue)
          .help("decompress a file (default)"))
     .arg(Arg::new("file")
+         .value_parser(clap::builder::ValueParser::os_string())
          .required(true))
     .group(ArgGroup::new("action")
-           .args(&["compress", "decompress"]))
+           .args(["compress", "decompress"]))
     .get_matches();
 
   if matches.get_flag("compress") {
