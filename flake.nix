@@ -12,7 +12,11 @@
         naersk-lib = pkgs.callPackage naersk { };
       in
       {
-        defaultPackage = naersk-lib.buildPackage ./.;
+        defaultPackage = naersk-lib.buildPackage {
+          src = ./.;
+          nativeBuildInputs = with pkgs; [ lz4 ];
+        };
+
         devShell = with pkgs; mkShell {
           buildInputs = [
             cargo
@@ -23,6 +27,7 @@
 
             lz4
           ];
+
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
         };
       });
